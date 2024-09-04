@@ -3,6 +3,26 @@ import { TaskColumns } from "./kanbanColumns.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const tasks = [];
+
+    async function getData(){
+        const url = "http://localhost:3000/api/tasks";
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok){
+                console.log(response.status);
+            }
+            
+            const json = await response.json();
+            console.log(json);
+
+            tasks.push(...json);
+            taskColumns.renderColumns();
+
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
     
     // Creates the task modal and columns
     const taskModal = new TaskModal(
@@ -18,6 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
         tasks,
         taskModal
     );
+
+    getData();
 
     // Event listener for the new task button
     document.getElementById("new-task-button").addEventListener("click", () => {
