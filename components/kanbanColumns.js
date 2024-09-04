@@ -99,7 +99,7 @@ export class TaskColumns {
             <div class="card-content">
                 <p class="title is-5">${task.title}</p>
                 <p class="description is-7">${task.description}</p>
-                <p class="assigned is-6">${task.assigned}</p>
+                <p class="assigned is-6">${task.assignedTo}</p>
             </div>
         `;
     

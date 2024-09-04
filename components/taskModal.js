@@ -29,7 +29,11 @@ export class TaskModal {
         // Creates the form fields
         const titleInput = this.createInput("title", "Título", "text", task ? task.title : "");
         const descriptionInput = this.createInput("description", "Descripción", "text", task ? task.description : "");
-        const assignedSelect = this.createSelect("assigned", "Asignado a", ["Persona 1", "Persona 2", "Persona 3"], task ? task.assigned : "");
+
+        const assignedToList = localStorage.getItem("assignedToList").split(',');
+        console.log(assignedToList);
+        const assignedSelect = this.createSelect("assignedTo", "Asignado a", assignedToList//["Persona 1", "Persona 2", "Persona 3"]
+            , task ? task.assignedTo : "");
         const prioritySelect = this.createSelect("priority", "Prioridad", ["Alta", "Media", "Baja"], task ? task.priority : "");
         const statusSelect = this.createSelect("status", "Estado", ["Backlog", "To Do", "In Progress", "Blocked", "Done"], task ? task.status : "");
         const dueDateInput = this.createInput("dueDate", "Fecha límite", "date", task ? task.dueDate : "");
@@ -114,7 +118,7 @@ export class TaskModal {
             this.tasks[taskIndex] = taskData;
         } else {
             taskData.id = Date.now().toString();
-            this.tasks.push(taskData);
+            this.tasks.push(...taskData);
         }
 
         this.closeModal();
