@@ -1,3 +1,4 @@
+import { BackendManager } from "./backendManager.js";
 export class TaskColumns {
     constructor(containerElement, tasks, modal) {
         this.containerElement = containerElement;
@@ -81,13 +82,13 @@ export class TaskColumns {
         // Sets the priority color
         let priorityColor;
         switch(task.priority.toLowerCase()) {
-            case "alta":
+            case "high":
                 priorityColor = "red";
                 break;
-            case "media":
+            case "medium":
                 priorityColor = "#e4be00";
                 break;
-            case "baja":
+            case "low":
                 priorityColor = "green";
                 break;
             default:
@@ -99,7 +100,7 @@ export class TaskColumns {
             <div class="card-content">
                 <p class="title is-5">${task.title}</p>
                 <p class="description is-7">${task.description}</p>
-                <p class="assigned is-6">${task.assigned}</p>
+                <p class="assigned is-6">${task.assignedTo}</p>
             </div>
         `;
     
@@ -133,7 +134,7 @@ export class TaskColumns {
      * Drops the task in the new column
      * @param {*} event the drop event
      */
-    drop(event) {
+    async drop(event) {
         event.preventDefault();
         const taskId = event.dataTransfer.getData("text");
         const newStatus = event.currentTarget.dataset.status;
@@ -141,6 +142,7 @@ export class TaskColumns {
         // Updates the task status
         const taskToUpdate = this.tasks.find(task => task.id === taskId);
         taskToUpdate.status = newStatus;
+        await BackendManager.editTask(taskToUpdate);
 
         this.loadTasksToColumns();
     }

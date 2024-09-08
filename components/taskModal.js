@@ -1,9 +1,11 @@
+import { BackendManager } from "./backendManager.js";
 export class TaskModal {
     constructor(modalElement, taskFormElement, tasks, onSave) {
         this.modalElement = modalElement;
         this.taskFormElement = taskFormElement;
         this.tasks = tasks;
         this.onSave = onSave;
+        this.assignees = BackendManager.getAssignees(tasks);
 
         this.saveTaskButton = document.getElementById("save-task");
         this.cancelModalButton = document.getElementById("cancel-modal");
@@ -29,10 +31,10 @@ export class TaskModal {
         // Creates the form fields
         const titleInput = this.createInput("title", "Título", "text", task ? task.title : "");
         const descriptionInput = this.createInput("description", "Descripción", "text", task ? task.description : "");
-        const assignedSelect = this.createSelect("assigned", "Asignado a", ["Persona 1", "Persona 2", "Persona 3"], task ? task.assigned : "");
-        const prioritySelect = this.createSelect("priority", "Prioridad", ["Alta", "Media", "Baja"], task ? task.priority : "");
+        const assignedSelect = this.createSelect("assignedTo", "Asignado a", this.assignees, task ? task.assignedTo : "");
+        const prioritySelect = this.createSelect("priority", "Prioridad", ["High", "Medium", "Low"], task ? task.priority : "");
         const statusSelect = this.createSelect("status", "Estado", ["Backlog", "To Do", "In Progress", "Blocked", "Done"], task ? task.status : "");
-        const dueDateInput = this.createInput("dueDate", "Fecha límite", "date", task ? task.dueDate : "");
+        const dueDateInput = this.createInput("endDate", "Fecha límite", "date", task ? task.dueDateFTD : "");
 
         // Appends the form fields to the form element
         const fieldContainer = document.createElement("div");
@@ -92,7 +94,7 @@ export class TaskModal {
      * @returns void
      * @example
      */
-    saveTask() {
+    async saveTask() {
         const titleInput = document.getElementById("title");
 
         // Validates that the title input exists
@@ -109,11 +111,16 @@ export class TaskModal {
         }
 
         // Saves the task data
+        if(taskData.endDate){
+            taskData.endDate = BackendManager.reverseDate(taskData.endDate);
+            taskData.dueDateFTD = BackendManager.convertDate(taskData.endDate);
+        }
         if (taskData.id) {
             const taskIndex = this.tasks.findIndex(task => task.id === taskData.id);
             this.tasks[taskIndex] = taskData;
+            await BackendManager.editTask(taskData);
         } else {
-            taskData.id = Date.now().toString();
+            taskData.id = await BackendManager.createTask(taskData);
             this.tasks.push(taskData);
         }
 
@@ -153,7 +160,7 @@ export class TaskModal {
      * @returns the select field div element
      * @example
      * createSelect("assigned", "Asignado a", ["Persona 1", "Persona 2", "Persona 3"], task ? task.assigned : "");
-     * createSelect("priority", "Prioridad", ["Alta", "Media", "Baja"], task ? task.priority : "");
+     * createSelect("priority", "Prioridad", ["High", "Medium", "Low"], task ? task.priority : "");
      */
     createSelect(id, labelText, options, selectedValue = "") {
         const fieldDiv = document.createElement("div");

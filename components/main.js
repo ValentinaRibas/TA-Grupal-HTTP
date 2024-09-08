@@ -1,8 +1,9 @@
 import { TaskModal } from "./taskModal.js";
 import { TaskColumns } from "./kanbanColumns.js";
+import { BackendManager } from "./backendManager.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-    const tasks = [];
+document.addEventListener("DOMContentLoaded", async () => {
+    const tasks = await BackendManager.getTasks();
     
     // Creates the task modal and columns
     const taskModal = new TaskModal(
