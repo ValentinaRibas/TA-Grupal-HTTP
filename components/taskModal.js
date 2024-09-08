@@ -4,6 +4,7 @@ export class TaskModal {
         this.taskFormElement = taskFormElement;
         this.tasks = tasks;
         this.onSave = onSave;
+        this.assignedToList = assignedToList;
 
         this.saveTaskButton = document.getElementById("save-task");
         this.cancelModalButton = document.getElementById("cancel-modal");
@@ -29,7 +30,7 @@ export class TaskModal {
         // Creates the form fields
         const titleInput = this.createInput("title", "Título", "text", task ? task.title : "");
         const descriptionInput = this.createInput("description", "Descripción", "text", task ? task.description : "");
-        const assignedSelect = this.createSelect("assigned", "Asignado a", ["Persona 1", "Persona 2", "Persona 3"], task ? task.assigned : "");
+        const assignedSelect = this.createSelect("assignedTo", "Asignado a", this.assignedToList, task ? task.assignedTo : "");
         const prioritySelect = this.createSelect("priority", "Prioridad", ["Alta", "Media", "Baja"], task ? task.priority : "");
         const statusSelect = this.createSelect("status", "Estado", ["Backlog", "To Do", "In Progress", "Blocked", "Done"], task ? task.status : "");
         const dueDateInput = this.createInput("dueDate", "Fecha límite", "date", task ? task.dueDate : "");
@@ -92,34 +93,66 @@ export class TaskModal {
      * @returns void
      * @example
      */
-    saveTask() {
+    async saveTask() {
         const titleInput = document.getElementById("title");
-
-        // Validates that the title input exists
+    
         if (titleInput.value.trim() === "") {
-            alert("El título es obligatorio");
-            return;
+          alert("El título es obligatorio");
+          return;
         }
-
-        // Gets the form data
+    
         const formData = new FormData(this.taskFormElement);
         const taskData = {};
         for (const pair of formData.entries()) {
-            taskData[pair[0]] = pair[1];
+          taskData[pair[0]] = pair[1];
         }
-
-        // Saves the task data
-        if (taskData.id) {
-            const taskIndex = this.tasks.findIndex(task => task.id === taskData.id);
-            this.tasks[taskIndex] = taskData;
-        } else {
+    
+        try {
+          if (taskData.id) {
+            // Si la tarea tiene un id, hacer un PUT para actualizarla
+            const taskId = taskData.id;
+            const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(taskData),
+            });
+    
+            if (!response.ok) {
+              throw new Error("Error al actualizar la tarea");
+            }
+    
+            const updatedTask = await response.json();
+            const taskIndex = this.tasks.findIndex((task) => task.id === taskId);
+            if (taskIndex !== -1) {
+              this.tasks[taskIndex] = updatedTask;
+            }
+          } else {
+            // Si no hay id, hacer un POST para crear una nueva tarea
             taskData.id = Date.now().toString();
-            this.tasks.push(taskData);
+            const response = await fetch("http://localhost:3000/api/tasks", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(taskData),
+            });
+    
+            if (!response.ok) {
+              throw new Error("Error al crear la tarea");
+            }
+    
+            const newTask = await response.json();
+            this.tasks.push(newTask);
+          }
+    
+          this.closeModal();
+          this.onSave();
+        } catch (error) {
+          console.error("Error al guardar la tarea:", error);
         }
-
-        this.closeModal();
-        this.onSave();
-    }
+      }
 
     /**
      * Creates an input field div element

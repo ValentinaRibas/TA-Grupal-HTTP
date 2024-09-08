@@ -3,23 +3,42 @@ import { TaskColumns } from "./kanbanColumns.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const tasks = [];
-    
-    // Creates the task modal and columns
+    const assignedToList = ["Rodrigo Lujambio", "Michel Sampil", "Jose Abadie"];
+
+    async function getData() {
+        const url = "http://localhost:3000/api/tasks";
+        try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.log(response.status);
+        }
+
+        const json = await response.json();
+        tasks.push(...json);
+
+        taskColumns.renderColumns();
+        } catch (error) {
+        console.error(error.message);
+        }
+    }
+
     const taskModal = new TaskModal(
         document.getElementById("task-modal"),
         document.getElementById("task-form"),
         tasks,
-        () => taskColumns.renderColumns()
+        () => taskColumns.renderColumns(),
+        assignedToList
     );
 
-    // Creates the task columns
     const taskColumns = new TaskColumns(
         document.getElementById("task-columns"),
         tasks,
         taskModal
     );
 
-    // Event listener for the new task button
+    getData();
+
     document.getElementById("new-task-button").addEventListener("click", () => {
         taskModal.openModal("Nueva Tarea");
     });
