@@ -27,8 +27,19 @@ export class BackendManager {
         return taskJson.id;
     }
 
-    editTask(){
+    static async editTask(task){
+        const putUrl = this.apiUrl + 'tasks/' + task.id;
+        const taskResult = await fetch(putUrl, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(task)
+        });
 
+        const taskJson = await taskResult.json();
+        return taskJson.id;
     }
 
     static getAssignees(tasks){

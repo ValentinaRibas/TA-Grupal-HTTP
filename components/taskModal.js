@@ -118,6 +118,7 @@ export class TaskModal {
         if (taskData.id) {
             const taskIndex = this.tasks.findIndex(task => task.id === taskData.id);
             this.tasks[taskIndex] = taskData;
+            await BackendManager.editTask(taskData);
         } else {
             taskData.id = await BackendManager.createTask(taskData);
             this.tasks.push(taskData);
