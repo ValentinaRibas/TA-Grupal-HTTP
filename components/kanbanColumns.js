@@ -81,13 +81,13 @@ export class TaskColumns {
         // Sets the priority color
         let priorityColor;
         switch(task.priority.toLowerCase()) {
-            case "alta":
+            case "high":
                 priorityColor = "red";
                 break;
-            case "media":
+            case "medium":
                 priorityColor = "#e4be00";
                 break;
-            case "baja":
+            case "low":
                 priorityColor = "green";
                 break;
             default:
@@ -99,7 +99,7 @@ export class TaskColumns {
             <div class="card-content">
                 <p class="title is-5">${task.title}</p>
                 <p class="description is-7">${task.description}</p>
-                <p class="assigned is-6">${task.assigned}</p>
+                <p class="assigned is-6">${task.assignedTo}</p>
             </div>
         `;
     
